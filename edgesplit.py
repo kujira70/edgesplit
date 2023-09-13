@@ -40,18 +40,21 @@ class EdgeFaceSplitOperator(bpy.types.Operator):
 
         # Get the active mesh
         obj = bpy.context.edit_object
-        me = obj.data
-        bm = bmesh.from_edit_mesh(me)
+        mesh_data = obj.data
+        bmesh_data = bmesh.from_edit_mesh(mesh_data)
 
-        # Find the closest edge
+        debug_print("Finding the closest edge to click on 3d view.")
         closest_edge = None
-        min_distance = float('inf')
+        min_distance_to_edge = float('inf')
         mouse_pos = mathutils.Vector((event.mouse_region_x, event.mouse_region_y))
         region_data = [area.spaces.active.region_3d for area in bpy.context.screen.areas if area.type == 'VIEW_3D'][0]
         perspective_matrix = region_data.perspective_matrix
 
-        debug_print("for1")
-        for edge in bm.edges:
+        if not bmesh_data.edges:
+            debug_print("No edge found.")
+            return('CANCELLED')
+
+        for edge in bmesh_data.edges:
             vert1_co = obj.matrix_world @ edge.verts[0].co
             vert2_co = obj.matrix_world @ edge.verts[1].co
 
@@ -79,36 +82,25 @@ class EdgeFaceSplitOperator(bpy.types.Operator):
             edge_center = (vec_screen_pos2D1 + vec_screen_pos2D2) * 0.5
             distance = (mouse_pos - edge_center).length
             debug_print("if4")
-            if distance < min_distance:
-                min_distance = distance
+            if distance < min_distance_to_edge:
+                min_distance_to_edge = distance
                 closest_edge = edge
 
-        debug_print("if5")
         # Split the closest edge
-        if closest_edge:
-            bmesh.utils.edge_split(closest_edge, closest_edge.verts[0], closest_edge.calc_length() / 2)
-            # Update & Free BMesh
-            bmesh.update_edit_mesh(me)
+        if not closest_edge:
+            debug_print("No closest edge found.")
+            return('CANCELLED')
+        
+        debug_print(f"Closest edge found: {closest_edge}")
+
+        # Splitting at centor for now. TODO:split at click
+        bmesh.utils.edge_split(closest_edge, closest_edge.verts[0], closest_edge.calc_length() / 2)
+        debug_print("Edge split performed")
 
         # Update & Free BMesh
-        bmesh.update_edit_mesh(me)
-
-        debug_print("return1")
+        bmesh.update_edit_mesh(mesh_data)
         bpy.context.view_layer.update()
         return {'FINISHED'}
-
-        debug_print("return2")
-        bpy.context.view_layer.update()
-        return {'RUNNING_MODAL'}
-
-        debug_print("if6")
-        if closest_edge:
-            debug_print(f"Closest edge found: {closest_edge}")
-            bmesh.utils.edge_split(closest_edge, closest_edge.verts[0], closest_edge.calc_length() / 2)
-            debug_print("Edge split performed")
-            bmesh.update_edit_mesh(me)
-        else:
-            debug_print("No closest edge found")
             
 
     def execute(self, context):
