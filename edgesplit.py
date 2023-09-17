@@ -29,13 +29,13 @@ class EdgeFaceSplitOperator(bpy.types.Operator):
         
         debug_print("Left mouse button pressed?")
         if not(event.type == 'LEFTMOUSE' and event.value == 'PRESS'):
-            return('CANCELLED')
+            return{'CANCELLED'}
         debug_print("Left mouse button pressed")
 
         bpy.ops.object.mode_set(mode='EDIT')  # Confirm the mode is EDIT otherwise the script below would not work.
         debug_print("MODE IS EDIT MODE?")
         if not(bpy.context.mode == 'EDIT_MESH'):
-            return('CANCELLED')
+            return{'CANCELLED'}
         debug_print("MODE IS EDIT MODE")
 
         # Get the active mesh
@@ -52,7 +52,7 @@ class EdgeFaceSplitOperator(bpy.types.Operator):
 
         if not bmesh_data.edges:
             debug_print("No edge found.")
-            return('CANCELLED')
+            return{'CANCELLED'}
 
         for edge in bmesh_data.edges:
             vert1_co = obj.matrix_world @ edge.verts[0].co
@@ -89,7 +89,7 @@ class EdgeFaceSplitOperator(bpy.types.Operator):
         # Split the closest edge
         if not closest_edge:
             debug_print("No closest edge found.")
-            return('CANCELLED')
+            return{'CANCELLED'}
         
         debug_print(f"Closest edge found: {closest_edge}")
 
@@ -134,15 +134,15 @@ def restore_keymap():
     km = kc.keymaps['3D View']
 #    kmi = km.keymap_items.new('view3d.zoom', 'RIGHTMOUSE', 'PRESS', ctrl=True, alt=True, shift=True)
     kmi = km.keymap_items.new('view3d.zoom', 'LEFTMOUSE', 'PRESS', ctrl=True, alt=True, shift=True)
-    print("Restored keymap for Ctrl+Shift+Alt+Left Click")
+    debug_print("Restored keymap for Ctrl+Shift+Alt+Left Click")
 
 def register():
-    print(f"registering EdgeFaceSplitOperator at {datetime.now()}")
+    debug_print(f"registering EdgeFaceSplitOperator at {datetime.now()}")
 #    bpy.utils.register_class(HUD_OT_show_message)
     bpy.utils.register_class(EdgeFaceSplitOperator)
     bpy.utils.register_class(DebugTriggerOperator) #debug operator
     km, kmi = register_keymaps()
-    print(f"registered EdgeFaceSplitOperator at {datetime.now()}")
+    debug_print(f"registered EdgeFaceSplitOperator at {datetime.now()}")
 
 #    remove_keymap()
 

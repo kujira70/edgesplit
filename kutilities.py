@@ -4,9 +4,22 @@ from datetime import datetime
 
 from mathutils import Vector
 
-def debug_print(text_to_be_printed):
-    print("Debug:" + text_to_be_printed)
+# Initialize a list to keep track of the text buffer
+text_buffer = []
 
+def debug_print(text_to_be_printed):
+    global text_buffer
+    
+    # Append new text to the buffer
+    text_buffer.append(text_to_be_printed)
+    
+    # Remove the oldest text if buffer exceeds 20 lines
+    if len(text_buffer) > 20:
+        text_buffer.pop(0)
+    
+    # Combine text buffer into a single string
+    combined_text = "\n".join(text_buffer)
+    
     # Find the first camera object
     camera = next((obj for obj in bpy.data.objects if obj.type == 'CAMERA'), None)
     if camera is None:
@@ -16,24 +29,37 @@ def debug_print(text_to_be_printed):
     # Check if DebugText already exists
     if "DebugText" in bpy.data.objects:
         text_obj = bpy.data.objects["DebugText"]
-        text_obj.data.body = text_to_be_printed
+        text_obj.data.body = combined_text
     else:
         # Create new text object
-        # Make sure you're in Object Mode before adding text
         if bpy.context.mode != 'OBJECT':
             bpy.ops.object.mode_set(mode='OBJECT')
-
-        # Create new text object
         bpy.ops.object.text_add(enter_editmode=False, align='WORLD', location=(0, 0, 0))
         text_obj = bpy.context.object
         text_obj.name = "DebugText"
         
     # Set the text
-    text_obj.data.body = text_to_be_printed
+    text_obj.data.body = combined_text
     
     # Position and rotate the text object to align with the camera view
     text_obj.location = camera.location + Vector((0, 0, -1))
     text_obj.rotation_euler = camera.rotation_euler
+
+    # Add constraints to make the text follow the camera
+    if "FollowCameraLoc" not in text_obj.constraints:
+        loc_constraint = text_obj.constraints.new('COPY_LOCATION')
+        loc_constraint.name = "FollowCameraLoc"
+        loc_constraint.target = camera
+
+    if "FollowCameraRot" not in text_obj.constraints:
+        rot_constraint = text_obj.constraints.new('COPY_ROTATION')
+        rot_constraint.name = "FollowCameraRot"
+        rot_constraint.target = camera
+
+    # Move the camera to frame the new text
+    camera.location = text_obj.location + Vector((0, 0, 1.5))
     
     # Scale the text object
-    text_obj.scale = (0.1, 0.1, 0.1)
+    text_obj.scale = (0.05, 0.05, 0.05)
+    
+    # TODO: Add code to highlight the new line with a different material
