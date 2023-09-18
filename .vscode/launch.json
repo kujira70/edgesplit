@@ -1,18 +1,16 @@
+
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/edgesplit.py"
-        },
-        {
             "name": "Blender",
-            "type": "python",
+            "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/edgesplit.py",
-            "env": {"PYTHONPATH": "C:/Program Files/Blender Foundation/Blender 3.6/3.6/python/bin"}
+            "program": "C:/Program Files/Blender Foundation/Blender 3.6/blender.exe",
+            "args": ["${workspaceFolder}/edgesplit.blend", "-P", "${workspaceFolder}/edgesplit.py"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {}
         }
     ]
 }

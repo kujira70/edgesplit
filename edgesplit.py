@@ -2,7 +2,7 @@
 # This version includes face splitting functionality
 
 bl_info = {
-    "name": "Edge and Face Split",
+    "name": "KJ Edge and Face Split",
     "blender": (2, 80, 0),
     "category": "Object",
 }
@@ -21,7 +21,7 @@ from kutilities import debug_print
 
 class EdgeFaceSplitOperator(bpy.types.Operator):
     bl_idname = "object.edge_face_split"
-    bl_label = "Edge and Face Split"
+    bl_label = "KJ Edge and Face Split"
     bl_options = {'REGISTER', 'UNDO'}
     
     def modal(self, context, event):
@@ -29,6 +29,7 @@ class EdgeFaceSplitOperator(bpy.types.Operator):
         
         debug_print("Left mouse button pressed?")
         if not(event.type == 'LEFTMOUSE' and event.value == 'PRESS'):
+            debug_print("Left mouse button not pressed.")
             return{'CANCELLED'}
         debug_print("Left mouse button pressed")
 

@@ -6,8 +6,11 @@ from mathutils import Vector
 
 # Initialize a list to keep track of the text buffer
 text_buffer = []
+text_counter = 1
 
 def debug_print(text_to_be_printed):
+    print(text_to_be_printed)
+
     global text_buffer
     
     # Append new text to the buffer
@@ -18,8 +21,9 @@ def debug_print(text_to_be_printed):
         text_buffer.pop(0)
     
     # Combine text buffer into a single string
-    combined_text = "\n".join(text_buffer)
-    
+    combined_text = "\n".join(text_counter + " " + text_buffer)
+    text_counter += 1
+
     # Find the first camera object
     camera = next((obj for obj in bpy.data.objects if obj.type == 'CAMERA'), None)
     if camera is None:
@@ -42,7 +46,15 @@ def debug_print(text_to_be_printed):
     text_obj.data.body = combined_text
     
     # Position and rotate the text object to align with the camera view
-    text_obj.location = camera.location + Vector((0, 0, -1))
+    # text_obj.location = camera.location + Vector((0, 0, -1))
+
+    # Calculate the direction the camera is facing
+    camera_direction = mathutils.Vector((0, 0, -1))
+    camera_direction.rotate(camera.rotation_euler)
+
+    # Position the text object in front of the camera
+    distance_in_front_of_camera = 3  # Adjust this distance as needed
+    text_obj.location = camera.location + camera_direction * distance_in_front_of_camera
     text_obj.rotation_euler = camera.rotation_euler
 
     # Add constraints to make the text follow the camera
@@ -56,8 +68,8 @@ def debug_print(text_to_be_printed):
         rot_constraint.name = "FollowCameraRot"
         rot_constraint.target = camera
 
-    # Move the camera to frame the new text
-    camera.location = text_obj.location + Vector((0, 0, 1.5))
+#    # Move the camera to frame the new text
+#    camera.location = text_obj.location + Vector((0, 0, 1.5))
     
     # Scale the text object
     text_obj.scale = (0.05, 0.05, 0.05)
